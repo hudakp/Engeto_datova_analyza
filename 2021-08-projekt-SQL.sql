@@ -1,13 +1,11 @@
-
 CREATE TABLE t_peter_hudak_projekt_sql_final
-#(test_date, test_performed, population_density, 'HDP na obyvatela', gini, mortaliy_under5, ...);
 SELECT
 		ct.country,
 		ct.`date`,
 		IF((weekday(ct.`date`) BETWEEN 0 AND 4),
 	'WEEK',
 	'NO_WEEK') AS 'work_day',
-	# WEEKDAY()  (0 = Monday, 1 = Tuesday, ... 6 = Sunday)
+	/*(0 = Monday, 1 = Tuesday,	... 6 = Sunday)*/
 	ct.tests_performed,
 	(CASE
 		WHEN MONTH(ct.`date`) BETWEEN 01 AND 03 THEN 0
@@ -25,8 +23,7 @@ SELECT
 		w_source.average_daily_temp,
 		w_source.rain_per_day,
 		w_source.gust_per_day,
-	# !!! od tohto bodu, nenatahuje spravne data
-	life_source.avg_life,
+		life_source.avg_life,
 		rel_chris.population / c_source.population AS 'Christianity',
 		rel_islam.population / c_source.population AS 'Islam',
 		rel_judaism.population / c_source.population AS 'Judaism',
@@ -35,7 +32,7 @@ SELECT
 		rel_buddhism.population / c_source.population AS 'Buddhism',
 		rel_folk_religions.population / c_source.population AS 'Folk_Religions',
 		rel_other_religions.population / c_source.population AS 'Other_Religions'
-	FROM
+FROM
 	covid19_tests ct
 LEFT JOIN (
 	SELECT
@@ -47,26 +44,25 @@ LEFT JOIN (
 	FROM
 		countries c) c_source ON
 	ct.country = c_source.country
-LEFT JOIN (	SELECT
+LEFT JOIN (
+	SELECT
 		country,
+		`year`,
 		GDP / population AS hdp_per_cap,
 		gini,
 		mortaliy_under5
 	FROM
-		economies e 
+		economies e
 	WHERE
-		`year` = '2019'
-		AND gini IS NOT NULL
-		AND mortaliy_under5 IS NOT NULL	) hdp_2020 ON
+		`year` = '2018' ) hdp_2020 ON
 	ct.country = hdp_2020.country
 LEFT JOIN (
 	SELECT
 		city,
 		`date`,
-		ROUND(AVG(CONVERT(temp , DOUBLE)), 2) AS average_daily_temp,
-		SUM(rain) AS rain_per_day,
+		AVG(REPLACE(temp, ' °c', '')) AS average_daily_temp,
+		SUM(REPLACE(rain, ' mm', '')) AS rain_per_day,
 		MAX(gust) AS gust_per_day
-		# mozny zapis = SELECT CONVERT(REPLACE('4 °c', ' °c', ''),DOUBLE);
 	FROM
 		weather w
 	WHERE
@@ -79,21 +75,21 @@ LEFT JOIN (
 			OR `time` = '18:00' )
 	GROUP BY
 		city,
-		`date`		
-		) w_source ON
+		`date`) w_source ON
 	c_source.capital_city = w_source.city
 	AND ct.`date` = w_source.`date`
 LEFT JOIN (
 	SELECT
 		country,
+		`year`,
 		AVG(life_expectancy) AS avg_life
 	FROM
 		life_expectancy
 	WHERE
-		`year` BETWEEN 1950 AND 2015
-		) life_source ON
+		`YEAR` BETWEEN 1950 AND 2015
+	GROUP BY
+		country) life_source ON
 	ct.country = life_source.country
-	# nerozumiem preco sa nezobrazuje "avg_life"?! , ked to spustim samostatne tak je to ok./*GROUP BY country*/
 LEFT JOIN (
 	SELECT
 		country,
@@ -124,7 +120,8 @@ LEFT JOIN (
 		YEAR = '2020'
 		AND religion = 'Judaism') rel_Judaism ON
 	ct.country = rel_Judaism.country
-LEFT JOIN ( SELECT
+LEFT JOIN (
+	SELECT
 		country,
 		population
 	FROM
@@ -153,7 +150,8 @@ LEFT JOIN (
 		YEAR = '2020'
 		AND religion = 'Buddhism') rel_buddhism ON
 	ct.country = rel_buddhism.country
-LEFT JOIN ( SELECT
+LEFT JOIN (
+	SELECT
 		country,
 		population
 	FROM
@@ -172,165 +170,3 @@ LEFT JOIN (
 		YEAR = '2020'
 		AND religion = 'Other Religions') rel_Other_Religions ON
 	ct.country = rel_Other_Religions.country;
-
-
-/*
-#////////////
-
-SELECT 
-country,
-population AS Total_population
-FROM countries c ;
-
-
-
-SELECT SUM(column_name)
-FROM table_name
-WHERE condition;
-
-
-relig_per_country
-
-
-Christianity
-Islam
-Judaism
-Unaffiliated Religions
-Hinduism
-Buddhism
-Folk Religions
-Other Religions
-
-*/
-
-
-
-
-	#/// 2. HDP na obyvatela
-/*
-SELECT
-	country,
-	GDP / population AS 'HDP na obyvatela'
-FROM
-	`engeto-2021-07-21`.economies 
-WHERE
-	`year` = '2020'
-GROUP BY
-	country ;*/
-
-
-#/// 3. GINI koeficient
-/*
-SELECT
-	country,
-	gini
-FROM
-	`engeto-2021-07-21`.economies 
-WHERE
-	`year` = '2020'
-GROUP BY
-	country ;*/
-
-
-#///4 . detska umrtnost
- /*
-SELECT
-	country,
-	mortaliy_under5
-FROM
-	`engeto-2021-07-21`.economies 
-WHERE
-	`year` = '2020'
-GROUP BY
-	country ;*/
-
-
-#/// 5.  v TAB median veku obzvatela 2018
-/*
-SELECT median_age_2018
-FROM countries c ;
-*/
-
-
-
-
-#/// 6. podiel nabozenstva
-
-# pridat vypocet ????
-
-
-
-
-
-#/// 7. ocakavania doba dozitia
-/*
-
-SELECT
-	country,
-	AVG(life_expectancy)
-FROM
-	`engeto-2021-07-21`.life_expectancy
-WHERE
-	`year` BETWEEN 1950 AND 2015
-GROUP BY country;
-*/
-
-
-
-#/// 8. avg denna teplota, nie nocna, pridat cez datum???
-
-/*
-# ziskat dennu teplotu
-SELECT
-	city,
-	`date`,
-	AVG(temp)
-FROM
-	weather w
-WHERE
-	`time` = '06:00'
-	OR `time` = '09:00'
-	OR `time` = '12:00'
-	OR `time` = '15:00'
-	OR `time` = '18:00'
-GROUP BY
-	city ,
-	`date` 
-;
-#day = from 06:00 to 18:00
-*/
-
-
-# /// 9. pocet hodin v danom dni, ked boli zrazky nenulove
-/*
-
-SELECT
-	city,
-	`date`,
-	SUM(rain) AS rain_per_day
-FROM
-	weather w
-WHERE
-	city IS NOT NULL AND (`time` = '06:00'
-	OR `time` = '09:00'
-	OR `time` = '12:00'
-	OR `time` = '15:00'
-	OR `time` = '18:00')
-GROUP BY
-	city ,
-	`date`; 
-
-
-
-
-
-
-
-# na vzpocet dni resp kod rocneho pbdobia
-SELECT OrderID, Quantity,
-CASE
-    WHEN Quantity > 30 THEN "The quantity is greater than 30"
-    WHEN Quantity = 30 THEN "The quantity is 30"
-    ELSE "The quantity is under 30"
-END
-FROM OrderDetails;*/
