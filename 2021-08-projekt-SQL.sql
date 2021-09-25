@@ -14,16 +14,11 @@ SELECT
 	END) AS 'Season',
 		ct.tests_performed,
 		c_source.population_density,
-		hdp_2020.hdp_per_cap AS 'HDP na obyvatela',
-		hdp_2020.gini,
 		c_source.population,
+		hdp_2020.hdp_per_cap AS 'HDP na obyvatela',
+		hdp_2020.gini,		
 		hdp_2020.mortaliy_under5,
 		c_source.median_age_2018,
-		c_source.capital_city,
-		w_source.average_daily_temp,
-		w_source.rain_per_day,
-		w_source.gust_per_day,
-		life_source.avg_life,
 		rel_chris.population / c_source.population AS 'Christianity',
 		rel_islam.population / c_source.population AS 'Islam',
 		rel_judaism.population / c_source.population AS 'Judaism',
@@ -32,6 +27,12 @@ SELECT
 		rel_buddhism.population / c_source.population AS 'Buddhism',
 		rel_folk_religions.population / c_source.population AS 'Folk_Religions',
 		rel_other_religions.population / c_source.population AS 'Other_Religions'
+		c_source.capital_city,
+		w_source.average_daily_temp,
+		w_source.rain_per_day,
+		w_source.gust_per_day,
+		life_source.avg_life,
+		
 FROM
 	covid19_tests ct
 LEFT JOIN (
