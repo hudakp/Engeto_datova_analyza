@@ -6,13 +6,13 @@ SELECT
 	'WEEK',
 	'NO_WEEK') AS 'work_day',
 	/*(0 = Monday, 1 = Tuesday,	... 6 = Sunday)*/
-	ct.tests_performed,
 	(CASE
 		WHEN MONTH(ct.`date`) BETWEEN 01 AND 03 THEN 0
 		WHEN MONTH(ct.`date`) BETWEEN 04 AND 06 THEN 1
 		WHEN MONTH(ct.`date`) BETWEEN 07 AND 09 THEN 2
 		WHEN MONTH(ct.`date`) BETWEEN 10 AND 12 THEN 3
 	END) AS 'Season',
+		ct.tests_performed,
 		c_source.capital_city,
 		c_source.population_density,
 		c_source.median_age_2018,
@@ -60,7 +60,7 @@ LEFT JOIN (
 	SELECT
 		city,
 		`date`,
-		AVG(REPLACE(temp, ' °c', '')) AS average_daily_temp,
+		AVG(REPLACE(temp, ' Â°c', '')) AS average_daily_temp,
 		SUM(REPLACE(rain, ' mm', '')) AS rain_per_day,
 		MAX(gust) AS gust_per_day
 	FROM
