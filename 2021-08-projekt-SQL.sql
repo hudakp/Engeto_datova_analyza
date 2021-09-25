@@ -27,12 +27,11 @@ SELECT
 		rel_buddhism.population / c_source.population AS 'Buddhism',
 		rel_folk_religions.population / c_source.population AS 'Folk_Religions',
 		rel_other_religions.population / c_source.population AS 'Other_Religions'
+		life_source.avg_life,
 		c_source.capital_city,
 		w_source.average_daily_temp,
 		w_source.rain_per_day,
 		w_source.gust_per_day,
-		life_source.avg_life,
-		
 FROM
 	covid19_tests ct
 LEFT JOIN (
